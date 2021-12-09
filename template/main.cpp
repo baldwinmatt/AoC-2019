@@ -1,4 +1,4 @@
-#include "aoc21/helpers.h"
+#include "aoc/helpers.h"
 
 int main(int argc, char** argv) {
   aoc::AutoTimer t;
