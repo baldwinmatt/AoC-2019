@@ -68,7 +68,7 @@ public:
 
             const auto opcode = get_opcode();
 
-            DEBUG(std::cout << "PC: " << _pc << " Op " << _last_op << std::endl);
+            DEBUG(std::cout << "PC: " << _pc << " RB: " << _relative_base << " OP: " << _last_op << std::endl);
 
             switch (opcode) {
                 case 1: // add
@@ -76,7 +76,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "Add: " << d1 << "," << d2 << " Store: " << d3 << std::endl);
+                    DEBUG(std::cout << "ADD: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 + d2);
                     _pc += 4;
                     break;
@@ -86,7 +86,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "Mul: " << d1 << "," << d2 << " Store: " << d3 << std::endl);
+                    DEBUG(std::cout << "MUL: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 * d2);
                     _pc += 4;
                     break;
@@ -96,7 +96,7 @@ public:
                     assert(!inputs.empty());
                     const auto value = inputs.front();
                     const auto address = get_address(1);
-                    DEBUG(std::cout << "Input: " << value << " Store: " << address << std::endl);
+                    DEBUG(std::cout << "IN: " << value << std::endl);
                     store(address, value);
                     inputs.pop();
                     _pc += 2;
@@ -105,7 +105,7 @@ public:
                 case 4: // output
                 {
                     const auto value = get_parameter(1);
-                    DEBUG(std::cout << "Output: " << value << std::endl);
+                    DEBUG(std::cout << "OUT: " << value << std::endl);
                     outputs.push_back(value);
                     _pc += 2;
                     break;
@@ -115,7 +115,7 @@ public:
                     const auto value = get_parameter(1);
                     const auto new_pc = get_parameter(2);
                     DEBUG(std::cout << "JT: " << value << "," << new_pc << std::endl);
-                    if (!!value) {
+                    if (value) {
                         _pc = new_pc;
                     }
                     else {
@@ -141,7 +141,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "LT: " << d1 << "," << d2 << " Store: " << d3 << std::endl);
+                    DEBUG(std::cout << "LT: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 < d2);
                     _pc += 4;
                     break;
@@ -152,7 +152,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "EQ: " << d1 << "," << d2 << " Store: " << d3 << std::endl);
+                    DEBUG(std::cout << "EQ: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 == d2);
                     _pc += 4;
                     break;
@@ -161,7 +161,7 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     const auto new_rb = _relative_base + d1;
-                    DEBUG(std::cout << "Rel: " << d1 << "," << new_rb << std::endl);
+                    DEBUG(std::cout << "REL: " << d1 << std::endl);
                     _relative_base = new_rb;
                     _pc += 2;
                     break;
@@ -241,6 +241,7 @@ private:
     void store(size_t address, int64_t val) {
         if (address >= _memory.size()) {
             _memory.resize(address + 1, 0);
+            DEBUG(std::cout << "Memory Size: " << _memory.size() << std::endl);
         }
         _memory[address] = val;
     }
