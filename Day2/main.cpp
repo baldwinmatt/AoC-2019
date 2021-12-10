@@ -25,7 +25,7 @@ public:
                     const int64_t d1 = _code.at(_last_pos + 1);
                     const int64_t d2 = _code.at(_last_pos + 2);
                     const int64_t d3 = _code.at(_last_pos + 3);
-                    assert(d3 >= 0 && d3 < _code.size());
+                    assert(d3 >= 0 && d3 < static_cast<int64_t>(_code.size()));
                     _code[d3] = _code[d1] + _code[d2];
                     break;
                 }
@@ -34,7 +34,7 @@ public:
                     const int64_t d1 = _code.at(_last_pos + 1);
                     const int64_t d2 = _code.at(_last_pos + 2);
                     const int64_t d3 = _code.at(_last_pos + 3);
-                    assert(d3 >= 0 && d3 < _code.size());
+                    assert(d3 >= 0 && d3 < static_cast<int64_t>(_code.size()));
                     _code[d3] = _code[d1] * _code[d2];
                     break;
                 }
