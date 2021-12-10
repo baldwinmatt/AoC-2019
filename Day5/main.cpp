@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
     
     inputs.push(in[i]);
 
+    c.initialize();
     const auto result = c.run(inputs, outputs);
     if (!result) {
         std::cerr << c << std::endl;
