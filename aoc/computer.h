@@ -39,29 +39,48 @@ class  Computer
 {
 public:
     Computer(const std::string& program)
+        : Computer(program, false)
+    {
+    }
+
+    Computer(const std::string& program, bool pause_on_output)
         : _last_op(0)
-        , _pc(0)
-        , _relative_base(0) {
+        , _pc(SIZE_T_MAX)
+        , _relative_base(0)
+        , _pause_on_output(pause_on_output) {
         aoc::parse_as_integers(program, ',', [&](const auto t) { _init.push_back(t); });
         DEBUG(std::cout << "Memory Size: " << _init.size() << std::endl);
     }
 
     void initialize(int64_t noun, int64_t verb) {
-        _memory = _init;
+        initialize();
+
         store(1, noun);
         store(2, verb);
     }
 
     void initialize() {
         _memory = _init;
-    }
-
-    bool run(std::queue<int64_t> inputs, std::vector<int64_t>& outputs) {
-        if (_memory.empty()) {
-            initialize();
-        }
         _pc = 0;
         _relative_base = 0;
+        while (!_inputs.empty()) {
+            _inputs.pop();
+        }
+    }
+
+    void set_input(int64_t v) {
+        _inputs.push(v);
+    }
+
+    bool run(std::queue<int64_t>& inputs, std::queue<int64_t>& outputs) {
+        _inputs = inputs;
+        return run(outputs);
+    }
+
+    bool run(std::queue<int64_t>& outputs) {
+        if (!initialized()) {
+            initialize();
+        }
 
         while (1) {
             _last_op = get_address(0);
@@ -93,12 +112,14 @@ public:
                 }
                 case 3: // input
                 {
-                    assert(!inputs.empty());
-                    const auto value = inputs.front();
+                    assert(!_inputs.empty());
+                    if (_inputs.empty()) {
+                        throw std::runtime_error("Out of inputs");
+                    }
+                    const auto value = _inputs.front(); _inputs.pop();
                     const auto address = get_address(1);
                     DEBUG(std::cout << "IN: " << value << std::endl);
                     store(address, value);
-                    inputs.pop();
                     _pc += 2;
                     break;
                 }
@@ -106,15 +127,18 @@ public:
                 {
                     const auto value = get_parameter(1);
                     DEBUG(std::cout << "OUT: " << value << std::endl);
-                    outputs.push_back(value);
+                    outputs.push(value);
                     _pc += 2;
+                    if (_pause_on_output) {
+                        return false;
+                    }
                     break;
                 }
                 case 5: // Jump if true
                 {
                     const auto value = get_parameter(1);
                     const auto new_pc = get_parameter(2);
-                    DEBUG(std::cout << "JT: " << value << "," << new_pc << std::endl);
+                    DEBUG(std::cout << "JNZ: " << value << "," << new_pc << std::endl);
                     if (value) {
                         _pc = new_pc;
                     }
@@ -127,7 +151,7 @@ public:
                 {
                     const auto value = get_parameter(1);
                     const auto new_pc = get_parameter(2);
-                    DEBUG(std::cout << "JF: " << value << "," << new_pc << std::endl);
+                    DEBUG(std::cout << "JZ: " << value << "," << new_pc << std::endl);
                     if (!value) {
                         _pc = new_pc;
                     }
@@ -141,7 +165,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "LT: " << d1 << "," << d2 << std::endl);
+                    DEBUG(std::cout << "SLT: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 < d2);
                     _pc += 4;
                     break;
@@ -152,7 +176,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_address(3);
-                    DEBUG(std::cout << "EQ: " << d1 << "," << d2 << std::endl);
+                    DEBUG(std::cout << "SEQ: " << d1 << "," << d2 << std::endl);
                     store(d3, d1 == d2);
                     _pc += 4;
                     break;
@@ -160,20 +184,18 @@ public:
                 case 9: // Adjust relative base
                 {
                     const auto d1 = get_parameter(1);
-                    const auto new_rb = _relative_base + d1;
-                    DEBUG(std::cout << "REL: " << d1 << std::endl);
-                    _relative_base = new_rb;
+                    DEBUG(std::cout << "ARB: " << d1 << std::endl);
+                    _relative_base = _relative_base + d1;
                     _pc += 2;
                     break;
                 }
                 case 99: // halt
                     return true;
                 default: // invalid opcode
-                    return false; 
+                   throw std::runtime_error("Invalid Opcode");
             }
         }
-
-        return false;
+        throw std::runtime_error("Invalid Opcode");
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Computer& comp) {
@@ -210,12 +232,19 @@ public:
         return _memory[address];
     }
 
+    bool initialized() const {
+        return _pc != SIZE_T_MAX;
+    }
+
 protected:
     int64_t _last_op;
     size_t _pc;
     size_t _relative_base;
+    const bool _pause_on_output;
+
     std::vector<int64_t> _memory;
     std::vector<int64_t> _init;
+    std::queue<int64_t> _inputs;
 
 private:
 

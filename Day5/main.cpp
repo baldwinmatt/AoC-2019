@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
   std::array<int, 2> in{ 1, 5 };
   for (int i = 0; i < 2; i++) {
     std::queue<int64_t> inputs;
-    std::vector<int64_t> outputs;
+    std::queue<int64_t> outputs;
     
     inputs.push(in[i]);
 

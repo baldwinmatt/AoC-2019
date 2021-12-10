@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
             c.initialize(12, 2);
 
             std::queue<int64_t> inputs;
-            std::vector<int64_t> outputs;
+            std::queue<int64_t> outputs;
             bool result = c.run(inputs, outputs);
             if (!result) {
                 std::cerr << c << std::endl;
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
             for (int64_t v = 0; !done && v < 100; v ++) {
                 c.initialize(n, v);
                 std::queue<int64_t> inputs;
-                std::vector<int64_t> outputs;
+                std::queue<int64_t> outputs;
                 bool result = c.run(inputs, outputs);
                 if (!result) {
                     std::cerr << c << std::endl;
