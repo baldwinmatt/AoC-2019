@@ -44,7 +44,7 @@ public:
         Grid g;
         int64_t x = 0;
         int64_t y = 0;
-        for (const auto p : path) {
+        for (const auto& p : path) {
             // Get the direction we will be walking
             const auto d = dirs[p.first];
 
@@ -63,7 +63,7 @@ public:
         int64_t x = 0;
         int64_t y = 0;
         int64_t steps = 0;
-        for (const auto p : path) {
+        for (const auto& p : path) {
             // Get the direction we will be walking
             const auto d = dirs[p.first];
 
@@ -81,7 +81,7 @@ public:
         int64_t x = 0;
         int64_t y = 0;
         int64_t min = INT64_MAX;
-        for (const auto p : path) {
+        for (const auto& p : path) {
             // Get the direction we will be walking
             Point d = dirs[p.first];
 
@@ -103,7 +103,7 @@ public:
         int64_t y = 0;
         int64_t min = INT64_MAX;
         int64_t steps = 0;
-        for (const auto p : path) {
+        for (const auto& p : path) {
             // Get the direction we will be walking
             Point d = dirs[p.first];
 

@@ -32,7 +32,7 @@ namespace {
       
       if (!comp.children.empty()) {
         os << " [ ";
-        for (const auto c : comp.children) {
+        for (const auto& c : comp.children) {
           os << *c;
         }
         os << " ] ";
@@ -75,7 +75,7 @@ namespace {
         return n_dist;
       }
 
-      for (const auto c : n->children) {
+      for (const auto& c : n->children) {
         auto r = visited.insert(c);
         // Already seen
         if (!r.second) {
