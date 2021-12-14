@@ -22,14 +22,14 @@ DE - two-digit opcode,      02 == opcode 2
 */
 
 /* Opcode:
-  1 - add
-  2 - multiply
-  3 - input 
-  4 - output
-  5 - Jump if true
-  6 - Jump if false
-  7 - Less than
-  8 - Equal
+  1 - add(ADD)
+  2 - multiply(MUL)
+  3 - input(IN)
+  4 - output(OUT)
+  5 - Jump if true(JNZ)
+  6 - Jump if false(JZ)
+  7 - Less than(SLT)
+  8 - Equal(SEQ)
   99 - halt
 */
 
