@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <cmath>
+#include <sstream>
 
 namespace aoc19 {
 
@@ -32,14 +33,36 @@ DE - two-digit opcode,      02 == opcode 2
   99 - halt
 */
 
-enum class ParameterMode {
-    Position = 0,
-    Immediate,
-    Relative
+class InvalidOpcode 
+    : std::exception
+{
+public:
+    InvalidOpcode(size_t pc, int64_t opcode) {
+        std::stringstream ss;
+
+        ss << "Invalid opcode [ pc: " << pc << ", op: " << opcode << " ]";
+
+        error = ss.str();
+
+        std::cerr << "InvalidOpcode: " << error << std::endl;
+    }
+
+    const char * what() const throw () {
+        return error.c_str();
+    }
+
+private:
+    std::string error;
 };
 
 class  Computer
 {
+    enum class ParameterMode {
+        Position = 0,
+        Immediate,
+        Relative
+    };
+
 public:
     Computer(const std::string& program)
         : Computer(program, false)
@@ -85,7 +108,7 @@ public:
             initialize();
         }
 
-        while (1) {
+        while (true) {
             _last_op = get_address(0);
 
             const auto opcode = get_opcode();
@@ -97,8 +120,8 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
-                    const auto d3 = get_address(3);
-                    DEBUG(std::cout << "ADD: " << d1 << "," << d2 << std::endl);
+                    const auto d3 = get_output_address(3);
+                    DEBUG(std::cout << "ADD: " << d1 << "," << d2 << " -> " << d3 << std::endl);
                     store(d3, d1 + d2);
                     _pc += 4;
                     break;
@@ -107,8 +130,8 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
-                    const auto d3 = get_address(3);
-                    DEBUG(std::cout << "MUL: " << d1 << "," << d2 << std::endl);
+                    const auto d3 = get_output_address(3);
+                    DEBUG(std::cout << "MUL: " << d1 << "," << d2 << " -> " << d3 << std::endl);
                     store(d3, d1 * d2);
                     _pc += 4;
                     break;
@@ -120,8 +143,8 @@ public:
                         throw std::runtime_error("Out of inputs");
                     }
                     const auto value = _inputs.front(); _inputs.pop();
-                    const auto address = get_address(1);
-                    DEBUG(std::cout << "IN: " << value << std::endl);
+                    const auto address = get_output_address(1);
+                    DEBUG(std::cout << "IN: " << value << " -> " << address << std::endl);
                     store(address, value);
                     _pc += 2;
                     break;
@@ -144,8 +167,7 @@ public:
                     DEBUG(std::cout << "JNZ: " << value << "," << new_pc << std::endl);
                     if (value) {
                         _pc = new_pc;
-                    }
-                    else {
+                    } else {
                         _pc += 3;
                     }
                     break;
@@ -157,8 +179,7 @@ public:
                     DEBUG(std::cout << "JZ: " << value << "," << new_pc << std::endl);
                     if (!value) {
                         _pc = new_pc;
-                    }
-                    else {
+                    } else {
                         _pc += 3;
                     }
                     break;
@@ -167,8 +188,8 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
-                    const auto d3 = get_address(3);
-                    DEBUG(std::cout << "SLT: " << d1 << "," << d2 << std::endl);
+                    const auto d3 = get_output_address(3);
+                    DEBUG(std::cout << "SLT: " << d1 << "," << d2 << " -> " << d3 << std::endl);
                     store(d3, d1 < d2);
                     _pc += 4;
                     break;
@@ -178,8 +199,8 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
-                    const auto d3 = get_address(3);
-                    DEBUG(std::cout << "SEQ: " << d1 << "," << d2 << std::endl);
+                    const auto d3 = get_output_address(3);
+                    DEBUG(std::cout << "SEQ: " << d1 << "," << d2 << " -> " << d3 << std::endl);
                     store(d3, d1 == d2);
                     _pc += 4;
                     break;
@@ -188,17 +209,17 @@ public:
                 {
                     const auto d1 = get_parameter(1);
                     DEBUG(std::cout << "ARB: " << d1 << std::endl);
-                    _relative_base = _relative_base + d1;
+                    _relative_base += d1;
                     _pc += 2;
                     break;
                 }
                 case 99: // halt
                     return true;
                 default: // invalid opcode
-                   throw std::runtime_error("Invalid Opcode");
+                   throw InvalidOpcode(_pc, opcode);
             }
         }
-        throw std::runtime_error("Invalid Opcode");
+        throw InvalidOpcode(_pc, _last_op);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Computer& comp) {
@@ -229,7 +250,7 @@ public:
     }
 
     int64_t get(size_t address) const {
-        if (address > _memory.size()) {
+        if (address >= _memory.size()) {
             return 0;
         }
         return _memory[address];
@@ -273,7 +294,6 @@ private:
     void store(size_t address, int64_t val) {
         if (address >= _memory.size()) {
             _memory.resize(address + 1, 0);
-            DEBUG(std::cout << "Memory Size: " << _memory.size() << std::endl);
         }
         _memory[address] = val;
     }
@@ -299,6 +319,20 @@ private:
                 return get_relative_address(0, val);
             case ParameterMode::Relative:
                 return get_relative_address(_relative_base, val);
+        }
+        throw std::runtime_error("Invalid parameter mode");
+    }
+
+    int64_t get_output_address(int index) {
+        const auto val = get_address(index);
+
+        switch (get_parameter_mode(index)) {
+            case ParameterMode::Immediate:
+                throw std::runtime_error("Immediate mode not supported for output address");
+            case ParameterMode::Position:
+                return val;
+            case ParameterMode::Relative:
+                return _relative_base + val;
         }
         throw std::runtime_error("Invalid parameter mode");
     }

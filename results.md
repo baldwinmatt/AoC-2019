@@ -12,7 +12,7 @@ Yours results will vary, as these are based on my inputs which are found in the 
 | 6 | 194721 | 316 |
 | 7 | 21860 | 2645740 |
 | 8 | 1452 | PHPEU |
-| 9 | DNC | DNC |
+| 9 | 3638931938 | 86025 |
 | 10 | DNC | DNC |
 | 11 | 2319 | DNC |
 
