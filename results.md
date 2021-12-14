@@ -13,6 +13,6 @@ Yours results will vary, as these are based on my inputs which are found in the 
 | 7 | 21860 | 2645740 |
 | 8 | 1452 | PHPEU |
 | 9 | 3638931938 | 86025 |
-| 10 | DNC | DNC |
+| 10 | 247 | 1919 |
 | 11 | 2319 | UERPRFGJ |
 
