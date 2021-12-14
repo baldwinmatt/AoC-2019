@@ -20,8 +20,8 @@ namespace {
 
     std::cout << "Grid: { " << tl.first << ", " << tl.second << " } -> { " << br.first << ", " << br.second << " }" << std::endl;
 
-    for (size_t y = 0; y < height; y++) {
-      for (size_t x = 0; x < width; x++) {
+    for (size_t y = 0; y <= height; y++) {
+      for (size_t x = 0; x <= width; x++) {
         Point p{x + tl.first, y + tl.second};
         const auto c = g.find(p);
         if (c != g.end()) {
@@ -80,15 +80,15 @@ int main(int argc, char** argv) {
   Point pos{0, 0};
   Direction dir = Direction::Up;
   aoc19::InputOutputs outputs;
-  aoc19::InputOutputs inputs;
   
-  inputs.push(0);
-
   Point top_left{ 0, 0 };
   Point bottom_right{0, 0};
 
+  c.initialize();
+  c.set_input(0);
+
   while (true) {
-    auto result = c.run(inputs, outputs);
+    auto result = c.run(outputs);
     if (result) {
       break;
     }
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     auto ir = g.insert(std::pair(pos, Color::White));
     ir.first->second = nc;
 
-    result = c.run(inputs, outputs);
+    result = c.run(outputs);
     const auto turn = outputs.front(); outputs.pop();
     assert (turn == 1 || turn == 0);
 
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     pos.second += w->second.second;
 
     const auto paint = g.find(pos);
-    inputs.push((paint == g.end() || paint->second == Color::Black) ? 0 : 1);
+    c.set_input((paint == g.end() || paint->second == Color::Black) ? 0 : 1);
 
     top_left.first = std::min(top_left.first, pos.first);
     top_left.second = std::min(top_left.second, pos.second);
