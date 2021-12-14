@@ -79,8 +79,8 @@ int main(int argc, char** argv) {
   // Initial point is 0,0
   Point pos{0, 0};
   Direction dir = Direction::Up;
-  std::queue<int64_t> outputs;
-  std::queue<int64_t> inputs;
+  aoc19::InputOutputs outputs;
+  aoc19::InputOutputs inputs;
   
   inputs.push(0);
 

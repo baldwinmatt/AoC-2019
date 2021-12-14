@@ -5,8 +5,8 @@
 namespace {
 
   const auto run_single_amp = [](aoc19::Computer& c, const auto phase, const auto out) {
-    std::queue<int64_t>inputs;
-    std::queue<int64_t>outputs;
+    aoc19::InputOutputs inputs;
+    aoc19::InputOutputs outputs;
 
     inputs.push(phase);
     inputs.push(out);
@@ -44,7 +44,7 @@ namespace {
     try {
 
       while (true) {
-        std::queue<int64_t>outputs;
+        aoc19::InputOutputs outputs;
         auto& amp = amps.front();
 
         if (!phases.empty()) {

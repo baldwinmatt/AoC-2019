@@ -6,6 +6,9 @@
 
 namespace aoc19 {
 
+    using InputOutputs = std::queue<int64_t>;
+    using Memory = std::vector<int64_t>;
+
 /*
 ABCDE
  1002
@@ -72,12 +75,12 @@ public:
         _inputs.push(v);
     }
 
-    bool run(std::queue<int64_t>& inputs, std::queue<int64_t>& outputs) {
+    bool run(const InputOutputs& inputs, InputOutputs& outputs) {
         _inputs = inputs;
         return run(outputs);
     }
 
-    bool run(std::queue<int64_t>& outputs) {
+    bool run(InputOutputs& outputs) {
         if (!initialized()) {
             initialize();
         }
@@ -242,9 +245,9 @@ protected:
     size_t _relative_base;
     const bool _pause_on_output;
 
-    std::vector<int64_t> _memory;
-    std::vector<int64_t> _init;
-    std::queue<int64_t> _inputs;
+    Memory _memory;
+    Memory _init;
+    InputOutputs _inputs;
 
 private:
 

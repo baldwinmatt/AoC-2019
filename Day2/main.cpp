@@ -15,8 +15,8 @@ int main(int argc, char **argv) {
             // Part 1
             c.initialize(12, 2);
 
-            std::queue<int64_t> inputs;
-            std::queue<int64_t> outputs;
+            aoc19::InputOutputs inputs;
+            aoc19::InputOutputs outputs;
             bool result = c.run(inputs, outputs);
             if (!result) {
                 std::cerr << c << std::endl;
@@ -30,8 +30,8 @@ int main(int argc, char **argv) {
         for (int64_t n = 0; !done && n < 100; n++) {
             for (int64_t v = 0; !done && v < 100; v ++) {
                 c.initialize(n, v);
-                std::queue<int64_t> inputs;
-                std::queue<int64_t> outputs;
+                aoc19::InputOutputs inputs;
+                aoc19::InputOutputs outputs;
                 bool result = c.run(inputs, outputs);
                 if (!result) {
                     std::cerr << c << std::endl;

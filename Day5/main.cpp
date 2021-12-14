@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
 
   std::array<int, 2> in{ 1, 5 };
   for (int i = 0; i < 2; i++) {
-    std::queue<int64_t> inputs;
-    std::queue<int64_t> outputs;
+    aoc19::InputOutputs inputs;
+    aoc19::InputOutputs outputs;
     
     inputs.push(in[i]);
 
