@@ -24,6 +24,8 @@ endmacro()
 
 subdirlist(SUBDIRS ${CMAKE_SOURCE_DIR})
 
+add_subdirectory("IntCode")
+
 foreach(subdir ${SUBDIRS})
   if (subdir MATCHES Day)
     add_subdirectory(${subdir})
