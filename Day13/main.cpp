@@ -7,7 +7,7 @@ namespace {
     Empty = 0,
     Wall,
     Block,
-    HorizontalPaddle,
+    Bat,
     Ball,
   };
 
@@ -36,33 +36,109 @@ int main(int argc, char** argv) {
   aoc::getline(f, s);
   f.close();
 
-  aoc19::Computer c(s);
+  aoc19::Computer c(s, true);
   
-  Board board;
   c.initialize();
   size_t blocks_count = 0;
+  bool running = true;
+  aoc19::InputOutputs outputs;
   do {
-    aoc19::InputOutputs outputs;
     const auto result = c.run(outputs);
 
-    while (!outputs.empty()) {
-      assert (outputs.size() >= 3);
+    switch (result) {
+      case aoc19::HaltCode::HasOutput:
+        if (outputs.size() < 3) {
+          break;
+        }
+        while (!outputs.empty()) {
+          outputs.pop();
+          outputs.pop();
+          auto t = outputs.front(); outputs.pop();
 
-      auto x = outputs.front(); outputs.pop();
-      auto y = outputs.front(); outputs.pop();
-      auto t = outputs.front(); outputs.pop();
-
-      Tile tile{x, y, t};
-      board.push_back(tile);
-
-      blocks_count += tile.type == Type::Block;
+          blocks_count += static_cast<Type>(t) == Type::Block;
+        }
+        break;
+      case aoc19::HaltCode::Halt:
+        running = false;
+        break;
+      case aoc19::HaltCode::NeedsInput:
+      case aoc19::HaltCode::Error:
+        std::cerr << "Unexpected error: " << std::endl;
+        std::cerr << c << std::endl;
+        return -1;
     }
-    if (result == aoc19::HaltCode::Halt) {
-      break;
-    }
-  } while (false);
+  } while (running);
 
   std::cout << "Part 1: " << blocks_count << std::endl;
+
+  // play game
+  while (!outputs.empty()) {
+    outputs.pop();
+  }
+
+  c.initialize();
+  c.set_memory(0, 2);
+  running = true;
+  Board board;
+  int64_t bat_x = 0;
+  int64_t ball_x = 0;
+  int64_t score = 0;
+  do {
+    const auto result = c.run(outputs);
+
+    switch (result) {
+      case aoc19::HaltCode::HasOutput:
+        if (outputs.size() < 3) {
+          break;
+        }
+        while (!outputs.empty()) {
+          auto x = outputs.front(); outputs.pop();
+          auto y = outputs.front(); outputs.pop();
+          auto t = outputs.front(); outputs.pop();
+
+          if (x < 0) {
+            score = t;
+          } else {
+            board.emplace_back(x, y, t);
+
+            switch (static_cast<Type>(t)) {
+              case Type::Ball:
+                ball_x = x;
+                break;
+              case Type::Bat:
+                bat_x = x;
+                break;
+              default:
+                break;
+            }
+          }
+        }
+        break;
+      case aoc19::HaltCode::Halt:
+        running = false;
+        break;
+      case aoc19::HaltCode::NeedsInput:
+        if (bat_x < ball_x) {
+          c.set_input(1);
+        } else if (bat_x == ball_x) {
+          c.set_input(0);
+        } else {
+          c.set_input( -1 );
+        }
+        break;
+      case aoc19::HaltCode::Error:
+        std::cerr << "Unexpected error: " << std::endl;
+        std::cerr << c << std::endl;
+        return -1;
+    }
+  } while (running);
+
+  while (!outputs.empty()) {
+    std::cout << "Output: " << outputs.front() << std::endl;
+    outputs.pop();
+  }
+
+  std::cout << "Part 2: " << score << std::endl;
 
   return 0;
 }

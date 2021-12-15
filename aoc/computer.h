@@ -100,6 +100,10 @@ public:
         }
     }
 
+    void set_memory(size_t address, int64_t value) {
+        store(address, value);
+    }
+
     void set_input(int64_t v) {
         _inputs.push(v);
     }
