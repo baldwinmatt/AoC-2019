@@ -17,8 +17,8 @@ int main(int argc, char **argv) {
 
             aoc19::InputOutputs inputs;
             aoc19::InputOutputs outputs;
-            bool result = c.run(inputs, outputs);
-            if (!result) {
+            auto result = c.run(inputs, outputs);
+            if (result != aoc19::HaltCode::Halt) {
                 std::cerr << c << std::endl;
                 std::cerr << "Error encountered, last opcode " <<
                     c.get_last_op() << " at " << c.get_pc() << std::endl;
@@ -32,8 +32,8 @@ int main(int argc, char **argv) {
                 c.initialize(n, v);
                 aoc19::InputOutputs inputs;
                 aoc19::InputOutputs outputs;
-                bool result = c.run(inputs, outputs);
-                if (!result) {
+                auto result = c.run(inputs, outputs);
+                if (result != aoc19::HaltCode::Halt) {
                     std::cerr << c << std::endl;
                     std::cerr << "Error encountered, last opcode " <<
                         c.get_last_op() << " at " << c.get_pc() << std::endl;

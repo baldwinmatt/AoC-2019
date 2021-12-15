@@ -10,6 +10,12 @@ namespace aoc19 {
     using InputOutputs = std::queue<int64_t>;
     using Memory = std::vector<int64_t>;
 
+    enum class HaltCode {
+        HasOutput = 0,
+        NeedsInput,
+        Halt,
+        Error,
+    };
 /*
 ABCDE
  1002
@@ -98,12 +104,12 @@ public:
         _inputs.push(v);
     }
 
-    bool run(const InputOutputs& inputs, InputOutputs& outputs) {
+    HaltCode run(const InputOutputs& inputs, InputOutputs& outputs) {
         _inputs = inputs;
         return run(outputs);
     }
 
-    bool run(InputOutputs& outputs) {
+    HaltCode run(InputOutputs& outputs) {
         if (!initialized()) {
             initialize();
         }
@@ -140,8 +146,9 @@ public:
                 {
                     assert(!_inputs.empty());
                     if (_inputs.empty()) {
-                        throw std::runtime_error("Out of inputs");
+                        return HaltCode::NeedsInput;
                     }
+
                     const auto value = _inputs.front(); _inputs.pop();
                     const auto address = get_output_address(1);
                     DEBUG(std::cout << "IN: " << value << " -> " << address << std::endl);
@@ -156,7 +163,7 @@ public:
                     outputs.push(value);
                     _pc += 2;
                     if (_pause_on_output) {
-                        return false;
+                        return HaltCode::HasOutput;
                     }
                     break;
                 }
@@ -214,7 +221,7 @@ public:
                     break;
                 }
                 case 99: // halt
-                    return true;
+                    return HaltCode::Halt;
                 default: // invalid opcode
                    throw InvalidOpcode(_pc, opcode);
             }

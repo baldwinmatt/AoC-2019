@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
     c.initialize();
     const auto result = c.run(inputs, outputs);
-    if (!result) {
+    if (result != aoc19::HaltCode::Halt) {
         std::cerr << c << std::endl;
 
         std::cerr << "Error encountered, last opcode " <<

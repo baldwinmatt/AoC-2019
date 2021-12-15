@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
       part1 = outputs.front();
       outputs.pop();
     }
-    if (result) {
+    if (result == aoc19::HaltCode::Halt) {
       break;
     }
   } while (!part1);
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
       part2 = outputs.front();
       outputs.pop();
     }
-    if (result) {
+    if (result == aoc19::HaltCode::Halt) {
       break;
     }
   } while (true);

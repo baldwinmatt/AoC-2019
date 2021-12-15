@@ -61,7 +61,7 @@ namespace {
           output = outputs.back();
         }
 
-        if (r) {
+        if (r == aoc19::HaltCode::Halt) {
           return output;
         }
 

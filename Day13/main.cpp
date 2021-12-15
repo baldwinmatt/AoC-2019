@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 
     while (!outputs.empty()) {
       assert (outputs.size() >= 3);
-      
+
       auto x = outputs.front(); outputs.pop();
       auto y = outputs.front(); outputs.pop();
       auto t = outputs.front(); outputs.pop();
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
       blocks_count += tile.type == Type::Block;
     }
-    if (result) {
+    if (result == aoc19::HaltCode::Halt) {
       break;
     }
   } while (false);

@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
     while (true) {
       auto result = c.run(outputs);
-      if (result) {
+      if (result == aoc19::HaltCode::Halt) {
         break;
       }
       const auto color = outputs.front(); outputs.pop();
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
       bottom_right.first = std::max(bottom_right.first, pos.first);
       bottom_right.second = std::max(bottom_right.second, pos.second);
 
-      if (result) {
+      if (result == aoc19::HaltCode::Halt) {
         break;
       }
     }
