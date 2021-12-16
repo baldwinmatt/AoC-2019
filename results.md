@@ -17,7 +17,7 @@ Yours results will vary, as these are based on my inputs which are found in the 
 | 11 | 2319 | UERPRFGJ |
 | 12 | DNC | DNC |
 | 13 | 312 | 15909 |
-| 14 | - | - |
+| 14 | 741927 | 2371699 |
 | 15 | - | - |
 | 16 | - | - |
 | 17 | - | - |
