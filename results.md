@@ -18,7 +18,7 @@ Yours results will vary, as these are based on my inputs which are found in the 
 | 12 | DNC | DNC |
 | 13 | 312 | 15909 |
 | 14 | 741927 | 2371699 |
-| 15 | - | - |
+| 15 | 380 | 410 |
 | 16 | - | - |
 | 17 | - | - |
 | 18 | - | - |

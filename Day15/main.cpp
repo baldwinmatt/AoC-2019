@@ -56,6 +56,7 @@ namespace {
     End = 2,
     Start = 3,
     Droid = 4,
+    Oxygen = 5,
   };
 
   class Grid {
@@ -63,8 +64,8 @@ namespace {
     Point bottom_right_;
     Point top_left_;
     Point pos_;
-    size_t end_cost_;
-    std::map<Point, std::pair<Tile, size_t>> grid_;
+    Point end_;
+    std::map<Point, Tile> grid_;
 
   public:
 
@@ -72,9 +73,9 @@ namespace {
       : bottom_right_(0, 0)
       , top_left_(0, 0)
       , pos_(0,0)
-      , end_cost_(SIZE_T_MAX)
+      , end_(INT_MAX, INT_MAX)
     {
-      set(pos_, Tile::Start, 0);
+      set(pos_, Tile::Start);
     }
 
     Tile get(const Point& pt) const {
@@ -87,20 +88,62 @@ namespace {
         return Tile::Unknown;
       }
 
-      return f->second.first;
+      return f->second;
     }
 
-    size_t get_end_cost() const {
-      return end_cost_;
-    }
-
-    void set(const Point& pt, const Tile t, const size_t cost) {
-      const auto r = grid_.emplace(pt, std::make_pair(t, cost));
+    void set(const Point& pt, const Tile t) {
+      if (t == Tile::End) {
+        end_ = pt;
+      }
+      const auto r = grid_.emplace(pt, t);
       if (!r.second) {
-        assert(r.first->second.first == t);
+        assert(r.first->second == t);
       }
     }
 
+    void hide_droid() {
+      pos_.first = INT_MIN;
+      pos_.second = INT_MIN;
+    }
+
+    void mark(const Point& pt, const Tile t) {
+      const auto r = grid_.emplace(pt, t);
+      r.first->second = t;
+    }
+
+    bool flood_with_o2() {
+      std::vector<Point>to_mark;
+      // This is terribly inefficient, perhaps we can walk out from the center?
+      const size_t height = bottom_right_.second - top_left_.second;
+      const size_t width = bottom_right_.first - top_left_.first;
+      for (size_t y = 0; y <= height; y++) {
+        for (size_t x = 0; x <= width; x++) {
+          const Point p{x + top_left_.first, y + top_left_.second};
+          const auto c = get(p);
+          switch (c) {
+            case Tile::Wall: continue;    // can't fill a wall
+            case Tile::Unknown: continue; // must be unreachable
+            case Tile::Oxygen: continue;  // already filled
+            default:
+              {
+                for (const auto& d : Directions) {
+                  const Point pt { p.first + d.first, p.second + d.second };
+                  if (get(pt) == Tile::Oxygen) {
+                    to_mark.push_back(p);
+                    break;
+                  }
+                }
+              }
+          }
+        }
+      }
+
+      for (const auto &pt : to_mark) {
+        mark(pt, Tile::Oxygen);
+      }
+      return !to_mark.empty();
+    }
+      
     void set_pos(const Point& pt) {
       pos_ = pt;
       top_left_.first = std::min(top_left_.first, pos_.first);
@@ -145,6 +188,24 @@ namespace {
       }
     }
 
+    const Point& get_end() const {
+      return end_;
+    }
+
+    size_t count_unknown() const {
+      size_t count = 0;
+      const size_t height = bottom_right_.second - top_left_.second;
+      const size_t width = bottom_right_.first - top_left_.first;
+      for (size_t y = 0; y <= height; y++) {
+        for (size_t x = 0; x <= width; x++) {
+          const Point p{x + top_left_.first, y + top_left_.second};
+          const auto c = get(p);
+          count += (c == Tile::Unknown);
+        }
+      }
+      return count;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Grid& grid) {
       const size_t height = grid.bottom_right_.second - grid.top_left_.second + 1;
       const size_t width = grid.bottom_right_.first - grid.top_left_.first + 1;
@@ -171,6 +232,9 @@ namespace {
               break;
             case Tile::Droid:
               os << aoc::bold_on << "*" << aoc::bold_off;
+              break;
+            case Tile::Oxygen:
+              os << "O";
               break;
           }
         }
@@ -245,6 +309,8 @@ int main(int argc, char** argv) {
   MoveList moves;
   c.initialize();
 
+  size_t part1 = SIZE_MAX;
+
   moves.emplace_back(target_pos, Direction::None, grid);
   do {
 #if !defined(INTERACTIVE)
@@ -257,25 +323,27 @@ int main(int argc, char** argv) {
 #endif
 
     const auto result = c.run(outputs);
-
     switch (result) {
       case aoc19::HaltCode::Halt:
         return 0;
       case aoc19::HaltCode::HasOutput:
         switch (outputs.front()) {
           case 0:
-            grid.set(target_pos, Tile::Wall, 0);
+            grid.set(target_pos, Tile::Wall);
             break;
           case 1:
-            grid.set(target_pos, Tile::Clear, 0);
+            grid.set(target_pos, Tile::Clear);
             grid.set_pos(target_pos);
             moves.emplace_back(target_pos, d, grid);  
             break;
           case 2:
-            grid.set(target_pos, Tile::Clear, 0);
+            grid.set(target_pos, Tile::End);
             grid.set_pos(target_pos);
-            aoc::print_result(1, moves.size());
-            return 0;
+            if (part1 == SIZE_MAX) {
+              part1 = moves.size();
+            }
+            moves.emplace_back(target_pos, d, grid);  
+            break;
           default:
             break;
         }
@@ -332,8 +400,30 @@ int main(int argc, char** argv) {
 #if defined(INTERACTIVE)
   } while (true);
 #else
-  } while (!moves.empty());
+  } while ((part1 == SIZE_MAX || grid.count_unknown() > 0) && !moves.empty());
 #endif
+
+  // Flood fill with oxygen
+  size_t part2 = 0;
+
+  Point pos = grid.get_end();
+  bool marked = true;
+  grid.mark(pos, Tile::Oxygen);
+  grid.hide_droid();
+
+  while (marked) {
+
+    marked = grid.flood_with_o2();
+    part2 += marked;
+    
+    if (display) {
+      std::cout << aoc::cls;
+      std::cout << grid << std::endl;
+      std::this_thread::sleep_for (std::chrono::milliseconds(10));
+    }
+  }
+
+  aoc::print_results(part1, part2);
 
   return 0;
 }
