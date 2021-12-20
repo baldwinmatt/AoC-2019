@@ -23,13 +23,13 @@ namespace {
 
   class Asteroid {
   public:
-  
+
     Asteroid(const Point& pt, const Point& home)
       : pt(pt)
     {
       const auto diff = pt_diff(pt, home);
 
-      angle = std::atan2f(static_cast<float>(diff.first), static_cast<float>(-diff.second));
+      angle = ::atan2f(static_cast<float>(diff.first), static_cast<float>(-diff.second));
       if (angle < 0.0f) {
         angle += 2.0f * M_PI;
       }
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
 
   size_t destroyed = 0;
   Point last{ 0, 0};
-  
+
   while (destroyed < 200 && !map.empty()){
     // get all visible
     const auto vis = get_visible(map, home);

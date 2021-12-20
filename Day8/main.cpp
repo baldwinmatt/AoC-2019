@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
   size_t zeroes = 0;
   size_t ones = 0;
   size_t twos = 0;
-  size_t least_zeroes = SIZE_T_MAX;
+  size_t least_zeroes = SIZE_MAX;
   size_t score = 0;
   bool first = true;
   while ((c = f.get()) && f.good()) {

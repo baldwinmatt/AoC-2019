@@ -77,7 +77,7 @@ public:
 
     Computer(const std::string& program, bool pause_on_output)
         : _last_op(0)
-        , _pc(SIZE_T_MAX)
+        , _pc(SIZE_MAX)
         , _relative_base(0)
         , _pause_on_output(pause_on_output) {
         aoc::parse_as_integers(program, ',', [&](const auto t) { _init.push_back(t); });
@@ -268,7 +268,7 @@ public:
     }
 
     bool initialized() const {
-        return _pc != SIZE_T_MAX;
+        return _pc != SIZE_MAX;
     }
 
 protected:

@@ -80,7 +80,7 @@ public:
     int64_t intersect_path(const Grid& g) {
         int64_t x = 0;
         int64_t y = 0;
-        int64_t min = INT64_MAX;
+        int64_t minv = INT64_MAX;
         for (const auto& p : path) {
             // Get the direction we will be walking
             Point d = dirs[p.first];
@@ -90,12 +90,14 @@ public:
                 y += d.second;
                 Point pt = {x, y};
                 if (g.find(pt) != g.end()) {
-                    min = std::min(min, ::abs(x) + ::abs(y));
+                    const int64_t abs_x = ::abs(x);
+                    const int64_t abs_y = ::abs(y);
+                    minv = std::min(minv, abs_x + abs_y);
                 }
             }
         }
 
-        return min;
+        return minv;
     }
 
     int64_t intersect_path(const DistanceGrid& g) {

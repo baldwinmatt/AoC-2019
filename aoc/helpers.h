@@ -6,6 +6,10 @@
 #include <string>
 #include <string_view>
 #include <chrono>
+#include <cassert>
+#include <iomanip>
+#include <functional>
+
 
 #ifndef NDEBUG
 #define DEBUG(x) do { \
