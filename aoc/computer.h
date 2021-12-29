@@ -5,6 +5,17 @@
 #include <cmath>
 #include <sstream>
 
+#ifdef AOC_DEBUG
+#define __DEBUG(x) do { \
+    x; \
+} while (0)
+#else
+#define __DEBUG(x)
+#endif
+
+#define __DEBUG_PRINT(x) do { __DEBUG(std::cout << x << std::endl); } while (0)
+
+
 namespace aoc19 {
 
     using InputOutputs = std::queue<int64_t>;
@@ -50,7 +61,7 @@ public:
 
         error = ss.str();
 
-        std::cerr << "InvalidOpcode: " << error << std::endl;
+        std::cerr << "InvalidOpcode: " << error;
     }
 
     const char * what() const throw () {
@@ -81,7 +92,7 @@ public:
         , _relative_base(0)
         , _pause_on_output(pause_on_output) {
         aoc::parse_as_integers(program, ',', [&](const auto t) { _init.push_back(t); });
-        DEBUG(std::cout << "Memory Size: " << _init.size() << std::endl);
+        __DEBUG_PRINT("Memory Size: " << _init.size());
     }
 
     void initialize(int64_t noun, int64_t verb) {
@@ -123,7 +134,7 @@ public:
 
             const auto opcode = get_opcode();
 
-            DEBUG(std::cout << "PC: " << _pc << " RB: " << _relative_base << " OP: " << _last_op << std::endl);
+            __DEBUG_PRINT("PC: " << _pc << " RB: " << _relative_base << " OP: " << _last_op);
 
             switch (opcode) {
                 case 1: // add
@@ -131,7 +142,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_output_address(3);
-                    DEBUG(std::cout << "ADD: " << d1 << "," << d2 << " -> " << d3 << std::endl);
+                    __DEBUG_PRINT("ADD: " << d1 << "," << d2 << " -> " << d3);
                     store(d3, d1 + d2);
                     _pc += 4;
                     break;
@@ -141,7 +152,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_output_address(3);
-                    DEBUG(std::cout << "MUL: " << d1 << "," << d2 << " -> " << d3 << std::endl);
+                    __DEBUG_PRINT("MUL: " << d1 << "," << d2 << " -> " << d3);
                     store(d3, d1 * d2);
                     _pc += 4;
                     break;
@@ -155,7 +166,7 @@ public:
 
                     const auto value = _inputs.front(); _inputs.pop();
                     const auto address = get_output_address(1);
-                    DEBUG(std::cout << "IN: " << value << " -> " << address << std::endl);
+                    __DEBUG_PRINT("IN: " << value << " -> " << address);
                     store(address, value);
                     _pc += 2;
                     break;
@@ -163,7 +174,7 @@ public:
                 case 4: // output
                 {
                     const auto value = get_parameter(1);
-                    DEBUG(std::cout << "OUT: " << value << std::endl);
+                    __DEBUG_PRINT("OUT: " << value);
                     outputs.push(value);
                     _pc += 2;
                     if (_pause_on_output) {
@@ -175,7 +186,7 @@ public:
                 {
                     const auto value = get_parameter(1);
                     const auto new_pc = get_parameter(2);
-                    DEBUG(std::cout << "JNZ: " << value << "," << new_pc << std::endl);
+                    __DEBUG_PRINT("JNZ: " << value << "," << new_pc);
                     if (value) {
                         _pc = new_pc;
                     } else {
@@ -187,7 +198,7 @@ public:
                 {
                     const auto value = get_parameter(1);
                     const auto new_pc = get_parameter(2);
-                    DEBUG(std::cout << "JZ: " << value << "," << new_pc << std::endl);
+                    __DEBUG_PRINT("JZ: " << value << "," << new_pc);
                     if (!value) {
                         _pc = new_pc;
                     } else {
@@ -200,7 +211,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_output_address(3);
-                    DEBUG(std::cout << "SLT: " << d1 << "," << d2 << " -> " << d3 << std::endl);
+                    __DEBUG_PRINT("SLT: " << d1 << "," << d2 << " -> " << d3);
                     store(d3, d1 < d2);
                     _pc += 4;
                     break;
@@ -211,7 +222,7 @@ public:
                     const auto d1 = get_parameter(1);
                     const auto d2 = get_parameter(2);
                     const auto d3 = get_output_address(3);
-                    DEBUG(std::cout << "SEQ: " << d1 << "," << d2 << " -> " << d3 << std::endl);
+                    __DEBUG_PRINT("SEQ: " << d1 << "," << d2 << " -> " << d3);
                     store(d3, d1 == d2);
                     _pc += 4;
                     break;
@@ -219,7 +230,7 @@ public:
                 case 9: // Adjust relative base
                 {
                     const auto d1 = get_parameter(1);
-                    DEBUG(std::cout << "ARB: " << d1 << std::endl);
+                    __DEBUG_PRINT("ARB: " << d1);
                     _relative_base += d1;
                     _pc += 2;
                     break;
