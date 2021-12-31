@@ -19,8 +19,8 @@ Yours results will vary, as these are based on my inputs which are found in the 
 | 13 | 312 | 15909 |
 | 14 | 741927 | 2371699 |
 | 15 | 380 | 410 |
-| 16 | - | - |
-| 17 | - | - |
+| 16 | 59522422 | 18650834 |
+| 17 | 2080 | 742673 |
 | 18 | - | - |
 | 19 | - | - |
 | 20 | - | - |
