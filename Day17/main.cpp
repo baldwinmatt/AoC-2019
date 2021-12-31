@@ -235,6 +235,14 @@ namespace {
     return s.find_first_not_of("ABC,") == std::string::npos;
   };
 
+  const auto FeedAsciiInput = [](aoc19::Computer& c, const auto& s) {
+    std::string_view sv(s.data(), s.size() - 1);
+    for (const auto& ch : sv) {
+      c.set_input(ch);
+    }
+    c.set_input('\n');
+  };
+
   const auto ReplaceAll = [](const std::string& haystack, const std::string& needle, const std::string& replacement) {
     std::string out(haystack);
     const size_t nlen = needle.size();
@@ -262,6 +270,14 @@ namespace {
         IsFunctorValidLen(func_b) &&
         IsFunctorValidLen(func_c) &&
         IsReduced(main);
+    }
+
+    void feed_to_intcode(aoc19::Computer& c) const {
+      // Feed the route to our computer, without trailing commas
+      FeedAsciiInput(c, main);
+      FeedAsciiInput(c, func_a);
+      FeedAsciiInput(c, func_b);
+      FeedAsciiInput(c, func_c);
     }
   };
 
@@ -347,15 +363,16 @@ int main(int argc, char** argv) {
   f.close();
 
   aoc19::Computer c(s, true);
-  aoc19::InputOutputs outputs;
   
   Map map;
   c.initialize();
 
-  map.set_visualize(argc > 2 && argv[2][0] == '1');
+  const bool visualize = argc > 2 && argv[2][0] == '1';
+  map.set_visualize(visualize);
 
   aoc19::HaltCode hc;
   do {
+    aoc19::InputOutputs outputs;
     hc = c.run(outputs);
     switch (hc) {
       case aoc19::HaltCode::Halt:
@@ -382,20 +399,48 @@ int main(int argc, char** argv) {
   DEBUG_PRINT(map);
 
   size_t part1 = 0;
-  for (size_t y = 1; y < map.height() - 1; y++) {
-    for (size_t x = 1; x < map.width() - 1; x++) {
-      if (map.is_intersection(x, y)) {
-        DEBUG_PRINT("Intersection: " << x << ", " << y);
-        part1 += x * y;
+  {
+    aoc::AutoTimer t("Part 1");
+    for (size_t y = 1; y < map.height() - 1; y++) {
+      for (size_t x = 1; x < map.width() - 1; x++) {
+        if (map.is_intersection(x, y)) {
+          DEBUG_PRINT("Intersection: " << x << ", " << y);
+          part1 += x * y;
+        }
       }
     }
   }
 
-  const auto r = map.build_route();
-  const auto rr = ReduceRoute(r);
+  // reset the computer to initial state
+  c.initialize();
 
-  aoc::print_result(1, part1);
-  aoc::print_result(2, r);
+  int64_t part2 = 0;
+
+  {
+    aoc::AutoTimer t("Part 2");
+
+    c.set_memory(0, 2);
+
+    const auto r = map.build_route();
+    const auto rr = ReduceRoute(r);
+    assert(rr.valid());
+
+    rr.feed_to_intcode(c);
+
+    c.set_input(visualize ? 'y' : 'n');
+    c.set_input('\n');
+
+    c.set_run_to_completion(true);
+    aoc19::InputOutputs outputs;
+    hc = c.run(outputs);
+
+    while (!outputs.empty()) {
+      part2 = outputs.front();
+      outputs.pop();
+    }
+  }
+
+  aoc::print_results(part1, part2);
 
   return 0;
 }

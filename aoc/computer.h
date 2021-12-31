@@ -119,6 +119,10 @@ public:
         _inputs.push(v);
     }
 
+    void set_run_to_completion(bool v) {
+        _pause_on_output = !v;
+    }
+
     HaltCode run(const InputOutputs& inputs, InputOutputs& outputs) {
         _inputs = inputs;
         return run(outputs);
@@ -286,7 +290,7 @@ protected:
     int64_t _last_op;
     size_t _pc;
     size_t _relative_base;
-    const bool _pause_on_output;
+    bool _pause_on_output;
 
     Memory _memory;
     Memory _init;
