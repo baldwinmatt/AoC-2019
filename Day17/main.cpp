@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 
 namespace {
 
@@ -218,6 +219,124 @@ namespace {
       return os;
     }
   };
+
+  // Checking: A,B,B,A,C,A,C,A,C,B,
+  // L,6,R,12,R,8,
+  // R,8,R,12,L,12,
+  // R,12,L,12,L,4,L,4,
+
+  const auto IsFunctorValidLen = [](const auto& s) {
+    const size_t max_size = 21;
+
+    return s.size() <= max_size;
+  };
+
+  const auto IsReduced = [](const auto& s) {
+    return s.find_first_not_of("ABC,") == std::string::npos;
+  };
+
+  const auto ReplaceAll = [](const std::string& haystack, const std::string& needle, const std::string& replacement) {
+    std::string out(haystack);
+    const size_t nlen = needle.size();
+
+    while (true) {
+      const auto it = std::find_end(out.begin(), out.end(), needle.begin(), needle.end());
+      if (it == out.end())
+          return out;
+
+      out.replace(it, it + nlen, replacement);
+    }
+  };
+
+  class Function {
+  public:
+    std::string main;
+    std::string func_a;
+    std::string func_b;
+    std::string func_c;
+
+    bool valid() const {
+      DEBUG_PRINT("Checking: " << main << " A: " << func_a << " B: " << func_b << " C: " << func_c);
+      return IsFunctorValidLen(main) &&
+        IsFunctorValidLen(func_a) &&
+        IsFunctorValidLen(func_b) &&
+        IsFunctorValidLen(func_c) &&
+        IsReduced(main);
+    }
+  };
+
+  const auto ReduceRoute = [](const auto &in) {
+    Function out;
+
+    out.main = in;
+    assert(!out.valid());
+
+    while (!out.valid()) {
+      auto start = in.begin();
+      size_t len = out.func_a.empty() ? in.size() / 2 : out.func_a.size() - 1;
+      for (; len > 1; len --) {
+        const auto end = start + len;
+        const auto r = std::search(end + 1, in.end(), start, end);
+        if (r != in.end() && *(end - 1) == ',') {
+          break;
+        }
+      }
+      if (len == 1) {
+        break;
+      }
+      out.func_a = std::move(in.substr(0, len));
+      if (!IsFunctorValidLen(out.func_a)) {
+        continue;
+      }
+
+      std::string main_b(ReplaceAll(in, out.func_a, "A,"));
+      start = main_b.begin() + main_b.find_first_not_of("A,");
+      len = main_b.size() / 2;
+      for (; len > 1; len--) {
+        const auto end = start + len;
+        const auto r = std::search(end + 1, main_b.cend(), start, end);
+        if (r == in.end() ||
+            *(end - 1) != ',' ||
+            std::find(start, end, 'A') != end) {
+          continue;
+        }
+
+        out.func_b = std::string(start, end);
+        if (!IsFunctorValidLen(out.func_b)) {
+          continue;
+        }
+
+        std::string main_c(ReplaceAll(main_b, out.func_b, "B,"));
+        const auto start_c = main_c.begin() + main_c.find_first_not_of("AB,");
+        auto len_c = main_c.size() / 2;
+        for (; len_c > 1; len_c --) {
+          const auto end_c = start_c + len_c;
+          auto r_c = std::search(end_c + 1, main_c.end(), start_c, end_c);
+
+          static const std::string AB("AB");
+          if (r_c == main_c.end() ||
+              *(end_c - 1) != ',' ||
+              find_first_of(start_c, end_c, AB.begin(), AB.end()) != end_c) {
+            continue;
+          }
+
+          out.func_c = std::string(start_c, end_c);
+          if (!IsFunctorValidLen(out.func_c)) {
+            continue;
+          }
+
+          out.main = ReplaceAll(main_c, out.func_c, "C,");
+          if (out.valid()) {
+            return out;
+          }
+        }
+      }
+    }
+
+    assert(out.valid());
+
+    return out;
+  };
 };
 
 int main(int argc, char** argv) {
@@ -273,6 +392,7 @@ int main(int argc, char** argv) {
   }
 
   const auto r = map.build_route();
+  const auto rr = ReduceRoute(r);
 
   aoc::print_result(1, part1);
   aoc::print_result(2, r);
